@@ -6,7 +6,9 @@ dotenv.config();
 
 const app = express();
 
-// Enable CORS for your live frontend (both https and www)
+// ------------------------------------------
+// CORS: Allow only your live frontend (https + www)
+// ------------------------------------------
 const allowedOrigins = [
     'https://mcorephysio.co.uk',
     'https://www.mcorephysio.co.uk'
@@ -14,7 +16,7 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function(origin, callback){
-        if(!origin) return callback(null, true); // allow requests with no origin (Postman, mobile apps)
+        if(!origin) return callback(null, true); // allow Postman, mobile apps, etc.
         if(allowedOrigins.indexOf(origin) === -1){
             const msg = 'CORS policy does not allow access from this origin.';
             return callback(new Error(msg), false);
@@ -24,16 +26,20 @@ app.use(cors({
     credentials: true
 }));
 
+// ------------------------------------------
 // Parse JSON body
+// ------------------------------------------
 app.use(express.json());
 
+// ------------------------------------------
 // Test route
+// ------------------------------------------
 app.get('/', (req, res) => {
     res.send('Server is running');
 });
 
 // ------------------------------------------
-// 1. Appointment Form Route (Existing - /sendmail)
+// 1. Appointment Form Route: /sendmail
 // ------------------------------------------
 app.post('/sendmail', async (req, res) => {
     const { first_name, surname, Age, sex, location_problem, email, preferred_time, service } = req.body;
@@ -80,7 +86,7 @@ app.post('/sendmail', async (req, res) => {
 });
 
 // ------------------------------------------
-// 2. Contact Form Route (Handles the /contact POST)
+// 2. Contact Form Route: /contact
 // ------------------------------------------
 app.post('/contact', async (req, res) => {
     const { username, email, message } = req.body;
@@ -102,10 +108,10 @@ app.post('/contact', async (req, res) => {
 
         const mailOptions = {
             from: process.env.SMTP_USER,
-            to: process.env.SMTP_USER, // The receiver email
+            to: process.env.SMTP_USER,
             subject: 'New Contact Form Submission',
             html: `
-                <h3>New Contact form Inquiry</h3>
+                <h3>New Contact Form Inquiry</h3>
                 <p><strong>Name:</strong> ${username}</p>
                 <p><strong>Email:</strong> ${email}</p>
                 <p><strong>Message:</strong></p>
@@ -122,6 +128,8 @@ app.post('/contact', async (req, res) => {
     }
 });
 
-// Start server
+// ------------------------------------------
+// Start Server
+// ------------------------------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
