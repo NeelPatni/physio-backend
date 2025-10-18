@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 
 // ------------------------------------------
-// CORS: Allow only your live frontend (https + www)
+// CORS: Allow your live frontend
 // ------------------------------------------
 const allowedOrigins = [
     'https://mcorephysio.co.uk',
@@ -16,10 +16,9 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function(origin, callback){
-        if(!origin) return callback(null, true); // allow Postman, mobile apps, etc.
+        if(!origin) return callback(null, true); // allow Postman or mobile apps
         if(allowedOrigins.indexOf(origin) === -1){
-            const msg = 'CORS policy does not allow access from this origin.';
-            return callback(new Error(msg), false);
+            return callback(new Error('CORS policy does not allow access from this origin.'), false);
         }
         return callback(null, true);
     },
@@ -39,7 +38,20 @@ app.get('/', (req, res) => {
 });
 
 // ------------------------------------------
-// 1. Appointment Form Route: /sendmail
+// Nodemailer transporter
+// ------------------------------------------
+const transporter = nodemailer.createTransport({
+    host: "smtp.hostinger.com",
+    port: 465,
+    secure: true,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
+
+// ------------------------------------------
+// Appointment Form Route
 // ------------------------------------------
 app.post('/sendmail', async (req, res) => {
     const { first_name, surname, Age, sex, location_problem, email, preferred_time, service } = req.body;
@@ -49,16 +61,6 @@ app.post('/sendmail', async (req, res) => {
     }
 
     try {
-        const transporter = nodemailer.createTransport({
-            host: "smtp.hostinger.com",
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        });
-
         const mailOptions = {
             from: process.env.SMTP_USER,
             to: process.env.SMTP_USER,
@@ -78,7 +80,6 @@ app.post('/sendmail', async (req, res) => {
 
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: 'Appointment email sent successfully' });
-
     } catch (error) {
         console.error('Error sending appointment email:', error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -86,7 +87,7 @@ app.post('/sendmail', async (req, res) => {
 });
 
 // ------------------------------------------
-// 2. Contact Form Route: /contact
+// Contact Form Route
 // ------------------------------------------
 app.post('/contact', async (req, res) => {
     const { username, email, message } = req.body;
@@ -96,16 +97,6 @@ app.post('/contact', async (req, res) => {
     }
 
     try {
-        const transporter = nodemailer.createTransport({
-            host: "smtp.hostinger.com",
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        });
-
         const mailOptions = {
             from: process.env.SMTP_USER,
             to: process.env.SMTP_USER,
@@ -121,7 +112,6 @@ app.post('/contact', async (req, res) => {
 
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: 'Your message has been sent successfully!' });
-
     } catch (error) {
         console.error('Error sending contact email:', error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -129,7 +119,7 @@ app.post('/contact', async (req, res) => {
 });
 
 // ------------------------------------------
-// Start Server
+// Start server
 // ------------------------------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
