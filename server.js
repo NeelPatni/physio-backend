@@ -1,54 +1,3 @@
-// import express from 'express';
-// import bodyParser from 'body-parser';
-// import cors from 'cors';
-// import nodemailer from 'nodemailer';
-
-// const app = express();
-// app.use(cors());
-// app.use(bodyParser.json());
-
-// app.post('/sendmail', async (req, res) => {
-//     const { first_name, surname, Age, sex, location_problem, email, preferred_time, service } = req.body;
-
-//     // create transporter
-//     const transporter = nodemailer.createTransport({
-//     host: "smtp.hostinger.com", // use Hostinger SMTP host
-//     port: 465,                  // SSL port
-//     secure: true,               // true for port 465
-//     auth: {
-//         user: "neel@taniyaweb.site", // your email
-//         pass: "Client@2025n"         // your email password
-//     }
-// });
-
-
-//     const mailOptions = {
-//         from: 'neel@taniyaweb.site',
-//         to: 'neel@taniyaweb.site', // where you want to receive the form
-//         subject: 'New Appointment Inquiry',
-//         html: `
-//             <h3>New Inquiry</h3>
-//             <p><strong>First Name:</strong> ${first_name}</p>
-//             <p><strong>Surname:</strong> ${surname}</p>
-//             <p><strong>Age:</strong> ${Age}</p>
-//             <p><strong>Sex:</strong> ${sex}</p>
-//             <p><strong>Location:</strong> ${location_problem}</p>
-//             <p><strong>Email:</strong> ${email}</p>
-//             <p><strong>Preferred Time:</strong> ${preferred_time}</p>
-//             <p><strong>Service:</strong> ${service}</p>
-//         `
-//     };
-
-//     try {
-//         await transporter.sendMail(mailOptions);
-//         res.status(200).json({ message: 'Email sent successfully' });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Internal Server Error', error });
-//     }
-// });
-
-// app.listen(5000, () => console.log('Server running on port 5000'));
 import express from 'express';
 import cors from 'cors';
 import nodemailer from 'nodemailer';
@@ -57,30 +6,23 @@ dotenv.config();
 
 const app = express();
 
-// Enable CORS for your frontend
-const cors = require('cors');
-
+// Enable CORS for your live frontend (both https and www)
 const allowedOrigins = [
-    'http://mcorephysio.co.uk',
     'https://mcorephysio.co.uk',
-    'http://www.mcorephysio.co.uk',
-    'https://www.mcorephysio.co.uk',
-    'http://127.0.0.1:5500' // optional: for local testing
+    'https://www.mcorephysio.co.uk'
 ];
 
 app.use(cors({
     origin: function(origin, callback){
-        // allow requests with no origin like mobile apps or curl
-        if(!origin) return callback(null, true);
+        if(!origin) return callback(null, true); // allow requests with no origin (Postman, mobile apps)
         if(allowedOrigins.indexOf(origin) === -1){
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            const msg = 'CORS policy does not allow access from this origin.';
             return callback(new Error(msg), false);
         }
         return callback(null, true);
     },
     credentials: true
 }));
-
 
 // Parse JSON body
 app.use(express.json());
